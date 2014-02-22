@@ -7,7 +7,7 @@
 #define PIXEL_OUTPUT 1           
 #define ANALOG_INPUT 2           
 #define NUM_PIXELS 19            
-#define BRIGHTNESS 30            
+byte brightness = 30;            
 
 int32_t storedVector = 0,
          newVector = 0;
@@ -15,10 +15,12 @@ uint32_t color = 0,
          color_timer = 0,  
          action_step_timer = 0,
          last_shacke = 0,
-         sparkel_timer = 0;
+         sparkel_timer = 0,
+         brightness_decay_timer = 0;
          
 uint16_t color_idx = 0, 
          curr_color_interval = 1000,
+         curr_brightness_decay_interval = 30,
          party_interval = 1000,
          sparkel_interval = 5000;
 uint8_t  spectrum_part = 0, 
@@ -34,7 +36,7 @@ void setup()
 {
     
   pixels.begin();
-  pixels.setBrightness(BRIGHTNESS);
+  pixels.setBrightness(brightness);
   nextColor();
   pixels.show();
   
@@ -55,10 +57,17 @@ void loop()
   newVector += lsm.accelData.z*lsm.accelData.z;
   newVector = sqrt(newVector);
   curr_color_granularity = 1;
+  if(brightness > 30 && (millis() - brightness_decay_timer) > curr_brightness_decay_interval){
+    brightness--;
+    brightness_decay_timer = millis();
+  }
+  pixels.setBrightness(brightness);
+  
   if (abs(newVector - storedVector) > MOVE_THRESHOLD) {
     curr_color_granularity = 20;
     nextColor();
     last_shacke = millis(); 
+    if(brightness < 150) brightness += 10;
     nr_shackes++;
   };
   
@@ -69,7 +78,8 @@ void loop()
   storedVector = newVector;
   
   if(nr_shackes > 8){
-    sparkel();
+    //sparkel();
+    
      nr_shackes = 0;
   }
   
@@ -85,7 +95,7 @@ void loop()
 
 int idx = 0;
 
-void sparkel(){
+/*void sparkel(){
   sparkel_timer = millis();
   pixels.setBrightness(100);
   while((millis() - sparkel_timer) < sparkel_interval){
@@ -97,9 +107,9 @@ void sparkel(){
     pixels.show();
   }
   
-  pixels.setBrightness(BRIGHTNESS);
+  pixels.setBrightness(brightness);
 
-}
+}*/
 
 void nextColor ()
 {
