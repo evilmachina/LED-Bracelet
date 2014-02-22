@@ -1,0 +1,5 @@
+LED-Bracelet
+============
+3d printed LED bracelet runing on Adafruit trinket (Attiny85).
+
+More info on my blog TBA
